@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import React, { useContext } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -7,28 +7,28 @@ import {
   Typography,
   Button,
   Container,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { useAuth } from '../contexts/AuthContext';
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { useAuth } from "../contexts/AuthContext";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  background: 'transparent',
-  boxShadow: 'none',
-  borderBottom: '1px solid #D4AF37',
+  background: "transparent",
+  boxShadow: "none",
+  borderBottom: "1px solid #D4AF37",
 }));
 
 const StyledToolbar = styled(Toolbar)({
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '0 16px',
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "0 16px",
 });
 
 const NavButton = styled(Button)(({ theme }) => ({
-  color: '#D4AF37',
-  margin: '0 8px',
-  '&:hover': {
-    color: '#B38B2D',
-    backgroundColor: 'transparent',
+  color: "#D4AF37",
+  margin: "0 8px",
+  "&:hover": {
+    color: "#B38B2D",
+    backgroundColor: "transparent",
   },
 }));
 
@@ -38,43 +38,41 @@ const Layout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <StyledAppBar position="static">
         <StyledToolbar>
-          <NavButton onClick={() => navigate('/')}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Wolly Hair Salon
+          <NavButton onClick={() => navigate("/")}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              WoolleyCutzz
             </Typography>
           </NavButton>
           <Box>
-            <NavButton onClick={() => navigate('/stylists')}>
+            <NavButton onClick={() => navigate("/stylists")}>
               Boka tid
             </NavButton>
             {user ? (
               <>
-                {user.role === 'admin' ? (
-                  <NavButton onClick={() => navigate('/admin/dashboard')}>
+                {user.role === "admin" ? (
+                  <NavButton onClick={() => navigate("/admin/dashboard")}>
                     Admin
                   </NavButton>
                 ) : (
-                  <NavButton onClick={() => navigate('/customer/dashboard')}>
+                  <NavButton onClick={() => navigate("/customer/dashboard")}>
                     Min Profil
                   </NavButton>
                 )}
-                <NavButton onClick={handleLogout}>
-                  Logga ut
-                </NavButton>
+                <NavButton onClick={handleLogout}>Logga ut</NavButton>
               </>
             ) : (
               <>
-                <NavButton onClick={() => navigate('/customer/login')}>
+                <NavButton onClick={() => navigate("/customer/login")}>
                   Kund Login
                 </NavButton>
-                <NavButton onClick={() => navigate('/admin/login')}>
+                <NavButton onClick={() => navigate("/admin/login")}>
                   Admin Login
                 </NavButton>
               </>
@@ -89,4 +87,4 @@ const Layout = () => {
   );
 };
 
-export default Layout; 
+export default Layout;

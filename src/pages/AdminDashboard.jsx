@@ -325,7 +325,7 @@ const AdminDashboard = () => {
           }}
         >
           <StyledTypography variant="h4">
-            Wolly Hair Salon - Admin Panel
+            WoolleyCutzz - Admin Panel
           </StyledTypography>
           <StyledButton
             variant="contained"

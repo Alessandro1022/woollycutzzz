@@ -30,7 +30,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
-app.use('/api/test', (req, res) => res.send("TEST OK"));
+app.get('/api/test', (req, res) => res.send("TEST OK"));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stylists', stylistRoutes);

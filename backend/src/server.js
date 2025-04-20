@@ -48,7 +48,8 @@ const connectWithRetry = async () => {
 
   while (retries < maxRetries) {
     try {
-      await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hair-booking', {
+      await mongoose.connect(process.env.MONGODB_URI, {
+        dbName: 'test',
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       });

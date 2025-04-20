@@ -128,11 +128,15 @@ userSchema.statics.findByCredentials = async (email, password) => {
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
-  
+
   delete userObject.password;
   delete userObject.tokens;
-  
+
   return userObject;
+};
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 export const User = mongoose.model('User', userSchema);

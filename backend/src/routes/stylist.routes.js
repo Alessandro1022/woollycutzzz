@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     if (process.env.NODE_ENV === 'development') {
       return res.json(mockStylists);
     }
-    
+
     const stylists = await Stylist.find({ isActive: true });
     res.json(stylists);
   } catch (error) {
@@ -195,8 +195,8 @@ router.get('/near/:postalCode', async (req, res) => {
         }
       }
     })
-    .select('-password')
-    .sort({ name: 1 });
+      .select('-password')
+      .sort({ name: 1 });
 
     res.json({
       status: 'success',

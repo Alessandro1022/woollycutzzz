@@ -1,37 +1,37 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Container, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardMedia, 
-  Typography, 
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
   TextField,
   CircularProgress,
   Alert,
   Button,
   Box,
-  CardActionArea
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/client';
+  CardActionArea,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import api from "../api/client";
 
 const StylistGrid = () => {
   const [stylists, setStylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   const fetchStylists = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/api/stylists');
+      const response = await api.get("/api/stylists");
       setStylists(response.data);
     } catch (err) {
-      console.error('Error fetching stylists:', err);
-      setError(err.message || 'Failed to fetch stylists');
+      console.error("Error fetching stylists:", err);
+      setError(err.message || "Failed to fetch stylists");
     } finally {
       setLoading(false);
     }
@@ -42,23 +42,29 @@ const StylistGrid = () => {
   }, [fetchStylists]);
 
   const handleSearch = useCallback((event) => {
-    setSearchTerm(event.target.value.toLowerCase());
+    setSearchTerm(event.target?.value?.toLowerCase());
   }, []);
 
   const handleStylistClick = (stylistId) => {
     navigate(`/stylist/${stylistId}`);
   };
 
-  const filteredStylists = stylists.filter(stylist => 
-    stylist.name.toLowerCase().includes(searchTerm) ||
-    stylist.specialties.some(specialty => 
-      specialty.toLowerCase().includes(searchTerm)
-    )
+  const filteredStylists = stylists.filter(
+    (stylist) =>
+      stylist?.name?.toLowerCase()?.includes(searchTerm) ||
+      stylist?.specialties?.some((specialty) =>
+        specialty?.toLowerCase()?.includes(searchTerm)
+      )
   );
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="60vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -67,8 +73,8 @@ const StylistGrid = () => {
   if (error) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert 
-          severity="error" 
+        <Alert
+          severity="error"
           action={
             <Button color="inherit" size="small" onClick={fetchStylists}>
               Retry
@@ -90,31 +96,31 @@ const StylistGrid = () => {
         onChange={handleSearch}
         sx={{ mb: 4 }}
       />
-      
+
       <Grid container spacing={4}>
         {filteredStylists.map((stylist) => (
-          <Grid item key={stylist._id} xs={12} sm={6} md={4}>
-            <Card 
-              sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
+          <Grid item key={stylist._id || stylist.id} xs={12} sm={6} md={4}>
+            <Card
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                "&:hover": {
+                  transform: "translateY(-4px)",
                   boxShadow: 4,
-                  transition: 'all 0.3s ease-in-out'
+                  transition: "all 0.3s ease-in-out",
                 },
-                cursor: 'pointer'
+                cursor: "pointer",
               }}
-              onClick={() => handleStylistClick(stylist._id)}
+              onClick={() => handleStylistClick(stylist._id || stylist.id)}
             >
               <CardActionArea>
                 <CardMedia
                   component="img"
                   height="200"
-                  image={stylist.imageUrl || '/default-stylist.jpg'}
+                  image={stylist.imageUrl || "/default-stylist.jpg"}
                   alt={stylist.name}
-                  sx={{ objectFit: 'cover' }}
+                  sx={{ objectFit: "cover" }}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography gutterBottom variant="h5" component="h2">
@@ -124,7 +130,7 @@ const StylistGrid = () => {
                     {stylist.bio}
                   </Typography>
                   <Typography variant="subtitle2" color="primary">
-                    Specialties: {stylist.specialties.join(', ')}
+                    Specialties: {stylist.specialties.join(", ")}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Experience: {stylist.experience} years
@@ -142,4 +148,4 @@ const StylistGrid = () => {
   );
 };
 
-export default StylistGrid; 
+export default StylistGrid;

@@ -14,7 +14,8 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
+  // origin: 'http://localhost:3000',
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -55,14 +56,14 @@ const connectWithRetry = async () => {
     } catch (err) {
       retries++;
       console.error(`MongoDB connection attempt ${retries} failed:`, err.message);
-      
+
       if (retries === maxRetries) {
         console.log('Max retries reached. Running in development mode with mock data.');
         // Set a flag to indicate we're running in mock mode
         process.env.MOCK_MODE = 'true';
         return;
       }
-      
+
       // Exponential backoff
       const delay = Math.min(1000 * Math.pow(2, retries), 10000);
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -76,7 +77,7 @@ const PORT = process.env.PORT || 4001;
 const startServer = async () => {
   try {
     await connectWithRetry();
-    
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

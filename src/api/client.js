@@ -128,19 +128,19 @@ api.interceptors.response.use(
     // No response from server (network error)
     if (!error.response && error.request) {
       console.warn('Network error or server not responding, using mock data fallback');
-      
+
       // Extract the path from the URL
       const path = error.config.url;
-      
+
       // Return mock data for known endpoints
       if (path.includes('/api/stylists') && !path.includes('/api/stylists/')) {
         return Promise.resolve({ data: mockData.stylists });
       }
-      
+
       if (path.includes('/api/auth/me') || path.includes('/api/users/profile')) {
         return Promise.resolve({ data: mockData.profile });
       }
-      
+
       if (path.includes('/api/stylists/') && path.split('/').length > 3) {
         const id = path.split('/').pop();
         const stylist = mockData.stylists.find(s => s._id === id);

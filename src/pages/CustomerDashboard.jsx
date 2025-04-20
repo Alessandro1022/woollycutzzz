@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Box,
@@ -24,34 +24,42 @@ import {
   Grid,
   Card,
   CardContent,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { format } from "date-fns";
+import { sv } from "date-fns/locale";
+import { formatDateToTime } from "../lib/helper";
+
+// API
+import {
+  deleteBookings,
+  fetchBookings,
+  updateBookings,
+} from "../api/bookings/index";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
-  background: 'linear-gradient(135deg, #FFFFFF 0%, #FDF6E3 100%)',
-  border: '1px solid #D4AF37',
+  background: "linear-gradient(135deg, #FFFFFF 0%, #FDF6E3 100%)",
+  border: "1px solid #D4AF37",
   borderRadius: 16,
-  boxShadow: '0 4px 8px rgba(212, 175, 55, 0.15)',
+  boxShadow: "0 4px 8px rgba(212, 175, 55, 0.15)",
 }));
 
 const StyledTypography = styled(Typography)(({ theme }) => ({
-  fontFamily: 'Playfair Display, serif',
-  color: '#D4AF37',
+  fontFamily: "Playfair Display, serif",
+  color: "#D4AF37",
   marginBottom: theme.spacing(3),
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #D4AF37 30%, #B38B2D 90%)',
-  boxShadow: '0 3px 5px 2px rgba(212, 175, 55, .3)',
-  color: '#FFFFFF',
-  padding: '10px 24px',
-  '&:hover': {
-    background: 'linear-gradient(45deg, #B38B2D 30%, #D4AF37 90%)',
+  background: "linear-gradient(45deg, #D4AF37 30%, #B38B2D 90%)",
+  boxShadow: "0 3px 5px 2px rgba(212, 175, 55, .3)",
+  color: "#FFFFFF",
+  padding: "10px 24px",
+  "&:hover": {
+    background: "linear-gradient(45deg, #B38B2D 30%, #D4AF37 90%)",
   },
 }));
 
@@ -67,42 +75,45 @@ const CustomerDashboard = () => {
 
   useEffect(() => {
     loadBookings();
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
-  const loadBookings = () => {
+  const loadBookings = async () => {
     try {
-      const storedBookings = localStorage.getItem('bookings');
+      const response = await fetchBookings();
+      const storedBookings = response.data.length ? response.data : [];
+
       if (storedBookings) {
-        const parsedBookings = JSON.parse(storedBookings);
-        setBookings(Array.isArray(parsedBookings) ? parsedBookings : []);
+        // const parsedBookings = JSON.parse(storedBookings);
+        // setBookings(Array.isArray(parsedBookings) ? parsedBookings : []);
+        setBookings(storedBookings);
       } else {
         setBookings([]);
       }
       setLoading(false);
     } catch (err) {
-      console.error('Error loading bookings:', err);
-      setError('Kunde inte ladda bokningar');
+      console.error("Error loading bookings:", err);
+      setError("Kunde inte ladda bokningar");
       setLoading(false);
     }
   };
 
   const handleStorageChange = (e) => {
-    if (e.key === 'bookings') {
+    if (e.key === "bookings") {
       loadBookings();
     }
   };
 
-  const showNotification = (message, type = 'info') => {
+  const showNotification = (message, type = "info") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const handleEdit = (booking) => {
@@ -111,78 +122,100 @@ const CustomerDashboard = () => {
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (bookingId) => {
+  const handleDelete = async (bookingId) => {
     try {
-      const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
-      localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-      setBookings(updatedBookings);
-      showNotification('Bokning borttagen', 'success');
+      const res = await deleteBookings(bookingId);
+      if (res.status === 200) {
+        await loadBookings();
+        // const updatedBookings = bookings.filter(
+        //   (booking) => (booking.id || booking._id) !== bookingId
+        // );
+        // localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+        // setBookings(updatedBookings);
+        showNotification("Bokning borttagen", "success");
+      }
     } catch (err) {
-      setError('Kunde inte ta bort bokning');
+      setError("Kunde inte ta bort bokning");
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedBooking(prev => ({
+    setEditedBooking((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     try {
-      const updatedBookings = bookings.map(booking => 
-        booking.id === editedBooking.id ? editedBooking : booking
-      );
-      localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-      setBookings(updatedBookings);
-      setEditDialogOpen(false);
-      showNotification('Bokning uppdaterad', 'success');
+      console.log("SUBMIT --->", editedBooking);
+
+      const res = await updateBookings(editedBooking);
+      if (res.status === 200) {
+        await loadBookings();
+        // const updatedBookings = bookings.map((booking) =>
+        //   booking.id === editedBooking.id ? editedBooking : booking
+        // );
+        // localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+        // setBookings(updatedBookings);
+        setEditDialogOpen(false);
+        showNotification("Bokning uppdaterad", "success");
+      } else {
+        setEditDialogOpen(false);
+        showNotification("Bokning uppdaterad", "error");
+      }
     } catch (err) {
-      setError('Kunde inte uppdatera bokning');
+      setError("Kunde inte uppdatera bokning");
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'error';
+      case "confirmed":
+        return "success";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'confirmed':
-        return 'Bekräftad';
-      case 'pending':
-        return 'Väntar';
-      case 'cancelled':
-        return 'Avbokad';
+      case "confirmed":
+        return "Bekräftad";
+      case "pending":
+        return "Väntar";
+      case "cancelled":
+        return "Avbokad";
       default:
         return status;
     }
   };
 
   const formatDate = (date) => {
-    return format(new Date(date), 'EEEE d MMMM yyyy', { locale: sv });
+    return format(new Date(date), "EEEE d MMMM yyyy", { locale: sv });
   };
 
   const formatTime = (time) => {
-    return format(new Date(time), 'HH:mm');
+    // return format(new Date(time), 'HH:mm');
+    return time;
   };
 
   const getStatistics = () => {
     const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-    const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-    const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
+    const confirmedBookings = bookings.filter(
+      (b) => b.status === "confirmed"
+    ).length;
+    const pendingBookings = bookings.filter(
+      (b) => b.status === "pending"
+    ).length;
+    const cancelledBookings = bookings.filter(
+      (b) => b.status === "cancelled"
+    ).length;
 
     return {
       totalBookings,
@@ -194,7 +227,14 @@ const CustomerDashboard = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -205,27 +245,29 @@ const CustomerDashboard = () => {
   return (
     <Container maxWidth="lg">
       {notification && (
-        <Alert 
-          severity={notification.type} 
-          sx={{ 
-            position: 'fixed', 
-            top: 20, 
-            right: 20, 
-            zIndex: 1000 
+        <Alert
+          severity={notification.type}
+          sx={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            zIndex: 1000,
           }}
         >
           {notification.message}
         </Alert>
       )}
       <Box sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <StyledTypography variant="h4">
-            Mina bokningar
-          </StyledTypography>
-          <StyledButton
-            variant="contained"
-            onClick={handleLogout}
-          >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+          }}
+        >
+          <StyledTypography variant="h4">Mina bokningar</StyledTypography>
+          <StyledButton variant="contained" onClick={handleLogout}>
             Logga ut
           </StyledButton>
         </Box>
@@ -237,9 +279,7 @@ const CustomerDashboard = () => {
                 <Typography color="textSecondary" gutterBottom>
                   Totalt antal bokningar
                 </Typography>
-                <Typography variant="h4">
-                  {stats.totalBookings}
-                </Typography>
+                <Typography variant="h4">{stats.totalBookings}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -295,7 +335,7 @@ const CustomerDashboard = () => {
               </TableHead>
               <TableBody>
                 {bookings.map((booking) => (
-                  <TableRow key={booking.id}>
+                  <TableRow key={booking.id || booking._id}>
                     <TableCell>{formatDate(booking.date)}</TableCell>
                     <TableCell>{formatTime(booking.time)}</TableCell>
                     <TableCell>{booking.service}</TableCell>
@@ -309,7 +349,12 @@ const CustomerDashboard = () => {
                       <IconButton onClick={() => handleEdit(booking)}>
                         <EditIcon />
                       </IconButton>
-                      <IconButton onClick={() => handleDelete(booking.id)}>
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete(booking.id || booking._id);
+                        }}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
@@ -331,7 +376,11 @@ const CustomerDashboard = () => {
                     label="Datum"
                     name="date"
                     type="date"
-                    value={editedBooking?.date ? format(new Date(editedBooking.date), 'yyyy-MM-dd') : ''}
+                    value={
+                      editedBooking?.date
+                        ? format(new Date(editedBooking.date), "yyyy-MM-dd")
+                        : ""
+                    }
                     onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }}
                   />
@@ -342,7 +391,16 @@ const CustomerDashboard = () => {
                     label="Tid"
                     name="time"
                     type="time"
-                    value={editedBooking?.time ? format(new Date(editedBooking.time), 'HH:mm') : ''}
+                    // value={
+                    //   editedBooking?.time
+                    //     ? format(new Date(editedBooking.time), "HH:mm")
+                    //     : ""
+                    // }
+                    value={
+                      editedBooking?.date
+                        ? formatDateToTime(editedBooking?.date)
+                        : ""
+                    }
                     onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }}
                   />
@@ -352,7 +410,7 @@ const CustomerDashboard = () => {
                     fullWidth
                     label="Tjänst"
                     name="service"
-                    value={editedBooking?.service || ''}
+                    value={editedBooking?.service || ""}
                     onChange={handleInputChange}
                   />
                 </Grid>
@@ -362,7 +420,7 @@ const CustomerDashboard = () => {
                     select
                     label="Status"
                     name="status"
-                    value={editedBooking?.status || ''}
+                    value={editedBooking?.status || ""}
                     onChange={handleInputChange}
                     SelectProps={{
                       native: true,
@@ -378,7 +436,9 @@ const CustomerDashboard = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditDialogOpen(false)}>Avbryt</Button>
-            <Button onClick={handleSaveEdit} color="primary">Spara</Button>
+            <Button onClick={handleSaveEdit} color="primary">
+              Spara
+            </Button>
           </DialogActions>
         </Dialog>
       </Box>
@@ -386,4 +446,4 @@ const CustomerDashboard = () => {
   );
 };
 
-export default CustomerDashboard; 
+export default CustomerDashboard;

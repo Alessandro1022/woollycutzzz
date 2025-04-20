@@ -1,5 +1,52 @@
 import mongoose from 'mongoose';
 
+// DO NOT DELETE
+// const bookingSchema = new mongoose.Schema({
+//   customer: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'User',
+//     required: true
+//   },
+//   stylist: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'User',
+//     required: true
+//   },
+//   service: {
+//     type: String,
+//     enum: ['haircut', 'coloring', 'styling', 'treatment', 'other'],
+//     required: true
+//   },
+//   date: {
+//     type: Date,
+//     required: true
+//   },
+//   startTime: {
+//     type: String,
+//     required: true
+//   },
+//   duration: {
+//     type: Number,
+//     required: true,
+//     min: 40,
+//     max: 480
+//   },
+//   price: {
+//     type: Number,
+//     required: true
+//   },
+//   status: {
+//     type: String,
+//     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+//     default: 'pending'
+//   },
+//   notes: String
+// }, {
+//   timestamps: true
+// });
+
+// Static method to check if a time slot is available
+
 const bookingSchema = new mongoose.Schema({
   customer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -11,44 +58,42 @@ const bookingSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  customerName: {
+    type: String,
+    required: true
+  },
+  customerPhone: {
+    type: String,
+    required: true
+  },
   service: {
     type: String,
-    enum: ['haircut', 'coloring', 'styling', 'treatment', 'other'],
     required: true
   },
   date: {
-    type: Date,
-    required: true
-  },
-  startTime: {
     type: String,
     required: true
   },
-  duration: {
-    type: Number,
-    required: true,
-    min: 40,
-    max: 480
-  },
-  price: {
-    type: Number,
+  time: {
+    type: String,
     required: true
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'completed', 'cancelled'],
-    default: 'pending'
+    required: true
   },
-  notes: String
+  // stylistId: {
+  //   type: String,
+  //   required: true
+  // },
 }, {
   timestamps: true
 });
 
-// Static method to check if a time slot is available
-bookingSchema.statics.isTimeSlotAvailable = async function(stylistId, date, startTime, duration) {
+bookingSchema.statics.isTimeSlotAvailable = async function (stylistId, date, startTime, duration) {
   const startDate = new Date(date);
   startDate.setHours(0, 0, 0, 0);
-  
+
   const endDate = new Date(date);
   endDate.setHours(23, 59, 59, 999);
 

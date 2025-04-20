@@ -1,4 +1,6 @@
 import express from 'express';
+import mongoose from "mongoose";
+
 import { auth } from '../middleware/auth.js';
 import Booking from '../models/booking.model.js';
 import { mockBookings } from '../data/mockData.js';
@@ -6,15 +8,22 @@ import { mockBookings } from '../data/mockData.js';
 const router = express.Router();
 
 // Get all bookings
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     if (process.env.NODE_ENV === 'development' || process.env.MOCK_MODE === 'true') {
       return res.json(mockBookings);
     }
-    const bookings = await Booking.find()
-      .populate('customer', 'name email')
-      .populate('stylist', 'name email');
-    res.json(bookings);
+    if (req.user.role === "admin") {
+      const bookings = await Booking.find()
+        .populate('customer', 'name email')
+        .populate('stylist', 'name email');
+      res.json(bookings);
+    } else {
+      const bookings = await Booking.find({ customer: new mongoose.Types.ObjectId(req.user._id) })
+        .populate('customer', 'name email')
+        .populate('stylist', 'name email');
+      res.json(bookings);
+    }
   } catch (error) {
     console.error('Error fetching bookings:', error);
     if (process.env.NODE_ENV === 'development') {
@@ -55,7 +64,7 @@ router.post('/', auth, async (req, res) => {
     }
     const booking = new Booking({
       ...req.body,
-      customer: req.user._id
+      customer: req?.user?._id
     });
     await booking.save();
     res.status(201).json(booking);
@@ -71,16 +80,30 @@ router.put('/:id', auth, async (req, res) => {
     if (process.env.NODE_ENV === 'development') {
       return res.json({ message: 'Booking updated (mock)' });
     }
-    const booking = await Booking.findOneAndUpdate(
-      { _id: req.params.id, customer: req.user._id },
-      req.body,
-      { new: true }
-    );
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+    if (req.user.role === "admin") {
+      const booking = await Booking.findOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(req.params.id) },
+        req.body,
+        { new: true }
+      );
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      res.json(booking);
+    } else {
+      const booking = await Booking.findOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(req.params.id), customer: req.user._id },
+        req.body,
+        { new: true }
+      );
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      res.json(booking);
     }
-    res.json(booking);
   } catch (error) {
+    console.log("error", error);
+
     console.error('Error updating booking:', error);
     res.status(400).json({ message: 'Error updating booking' });
   }
@@ -92,15 +115,28 @@ router.delete('/:id', auth, async (req, res) => {
     if (process.env.NODE_ENV === 'development') {
       return res.json({ message: 'Booking cancelled (mock)' });
     }
-    const booking = await Booking.findOneAndUpdate(
-      { _id: req.params.id, customer: req.user._id },
-      { status: 'cancelled' },
-      { new: true }
-    );
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+
+    if (req.user.role === "admin") {
+      const booking = await Booking.findOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(req.params.id) },
+        { status: 'Avbokad' },
+        { new: true }
+      );
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      res.json({ message: 'Booking cancelled successfully' });
+    } else {
+      const booking = await Booking.findOneAndUpdate(
+        { _id: req.params.id, customer: req.user._id },
+        { status: 'Avbokad' },
+        { new: true }
+      );
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      res.json({ message: 'Booking cancelled successfully' });
     }
-    res.json({ message: 'Booking cancelled successfully' });
   } catch (error) {
     console.error('Error cancelling booking:', error);
     res.status(500).json({ message: 'Error cancelling booking' });

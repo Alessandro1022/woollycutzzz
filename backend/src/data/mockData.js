@@ -1,4 +1,4 @@
-const stylists = [
+export const mockStylists = [
   {
     id: '1',
     name: 'Woolley Cutzzz',
@@ -36,6 +36,31 @@ const stylists = [
 ];
 
 export const mockBookings = [
+  {
+    _id: '1',
+    customer: '1',
+    stylist: '1',
+    service: 'haircut',
+    date: new Date('2024-03-25'),
+    startTime: '10:00',
+    duration: 60,
+    price: 500,
+    status: 'confirmed'
+  },
+  {
+    _id: '2',
+    customer: '1',
+    stylist: '2',
+    service: 'coloring',
+    date: new Date('2024-03-30'),
+    startTime: '14:00',
+    duration: 120,
+    price: 1200,
+    status: 'pending'
+  }
+];
+
+export const mockStylists2 = [
   {
     _id: '1',
     customer: '1',

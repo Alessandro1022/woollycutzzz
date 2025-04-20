@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
@@ -29,67 +29,68 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import LogoutIcon from '@mui/icons-material/Logout';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import EventIcon from '@mui/icons-material/Event';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import LogoutIcon from "@mui/icons-material/Logout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import EventIcon from "@mui/icons-material/Event";
+import { format } from "date-fns";
+import { sv } from "date-fns/locale";
+import { deleteBookings, fetchBookings, updateBookings } from "../api/bookings";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
-  background: 'linear-gradient(135deg, #FFFFFF 0%, #FDF6E3 100%)',
-  border: '1px solid #D4AF37',
+  background: "linear-gradient(135deg, #FFFFFF 0%, #FDF6E3 100%)",
+  border: "1px solid #D4AF37",
   borderRadius: 16,
-  boxShadow: '0 4px 8px rgba(212, 175, 55, 0.15)',
+  boxShadow: "0 4px 8px rgba(212, 175, 55, 0.15)",
 }));
 
 const StyledTypography = styled(Typography)(({ theme }) => ({
-  fontFamily: 'Playfair Display, serif',
-  color: '#D4AF37',
+  fontFamily: "Playfair Display, serif",
+  color: "#D4AF37",
   marginBottom: theme.spacing(3),
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #D4AF37 30%, #B38B2D 90%)',
-  boxShadow: '0 3px 5px 2px rgba(212, 175, 55, .3)',
-  color: '#FFFFFF',
-  padding: '10px 24px',
-  '&:hover': {
-    background: 'linear-gradient(45deg, #B38B2D 30%, #D4AF37 90%)',
+  background: "linear-gradient(45deg, #D4AF37 30%, #B38B2D 90%)",
+  boxShadow: "0 3px 5px 2px rgba(212, 175, 55, .3)",
+  color: "#FFFFFF",
+  padding: "10px 24px",
+  "&:hover": {
+    background: "linear-gradient(45deg, #B38B2D 30%, #D4AF37 90%)",
   },
 }));
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontFamily: 'Playfair Display, serif',
-  color: '#D4AF37',
-  fontWeight: 'bold',
+  fontFamily: "Playfair Display, serif",
+  color: "#D4AF37",
+  fontWeight: "bold",
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(2),
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: '#D4AF37',
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "#D4AF37",
     },
-    '&:hover fieldset': {
-      borderColor: '#B38B2D',
+    "&:hover fieldset": {
+      borderColor: "#B38B2D",
     },
-    '&.Mui-focused fieldset': {
-      borderColor: '#D4AF37',
+    "&.Mui-focused fieldset": {
+      borderColor: "#D4AF37",
     },
   },
-  '& .MuiInputLabel-root': {
-    color: '#D4AF37',
-    '&.Mui-focused': {
-      color: '#D4AF37',
+  "& .MuiInputLabel-root": {
+    color: "#D4AF37",
+    "&.Mui-focused": {
+      color: "#D4AF37",
     },
   },
 }));
@@ -102,43 +103,57 @@ const AdminDashboard = () => {
   const [notification, setNotification] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
   const [editFormData, setEditFormData] = useState({
-    date: '',
-    time: '',
-    service: '',
-    status: '',
+    date: "",
+    time: "",
+    service: "",
+    status: "",
   });
 
   useEffect(() => {
     loadBookings();
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const loadBookings = () => {
+  const loadBookings = async () => {
     try {
-      const storedBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      const response = await fetchBookings();
+      const storedBookings = response.data.length ? response.data : [];
       setBookings(storedBookings);
+      // const storedBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      // setBookings(storedBookings);
     } catch (err) {
-      setError('Kunde inte ladda bokningar');
-      console.error('Error loading bookings:', err);
+      setError("Kunde inte ladda bokningar");
+      console.error("Error loading bookings:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleStatusChange = async (booking, newStatus) => {
+    const _bookingItem = bookings.find((item) => item._id === booking._id);
+    const _updatedBooking = { ..._bookingItem, status: newStatus };
+    const res = await updateBookings(_updatedBooking);
+    if (res.status === 200) {
+      await loadBookings();
+      showNotification("Bokning uppdaterad", "success");
+    }
+  };
+
   const handleStorageChange = (e) => {
-    if (e.key === 'bookings') {
+    if (e.key === "bookings") {
       loadBookings();
     }
   };
 
-  const showNotification = (message, severity = 'success') => {
+  const showNotification = (message, severity = "success") => {
     setNotification({ message, severity });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleLogout = () => {
-    navigate('/admin/login');
+    localStorage.clear();
+    navigate("/admin/login");
   };
 
   const handleEdit = (booking) => {
@@ -151,56 +166,67 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (bookingId) => {
     try {
-      const updatedBookings = bookings.filter(booking => booking.id !== id);
-      localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-      setBookings(updatedBookings);
-      showNotification('Bokning borttagen');
+      const res = await deleteBookings(bookingId);
+      if (res.status === 200) {
+        await loadBookings();
+        showNotification("Bokning borttagen", "success");
+      }
+      // const updatedBookings = bookings.filter((booking) => booking.id !== id);
+      // localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+      // setBookings(updatedBookings);
+      // showNotification("Bokning borttagen");
     } catch (err) {
-      setError('Kunde inte ta bort bokningen');
-      console.error('Error deleting booking:', err);
+      setError("Kunde inte ta bort bokningen");
+      console.error("Error deleting booking:", err);
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     try {
-      const updatedBookings = bookings.map(booking =>
-        booking.id === editingBooking.id
-          ? { ...booking, ...editFormData }
-          : booking
-      );
-      localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-      setBookings(updatedBookings);
-      setEditingBooking(null);
-      showNotification('Bokning uppdaterad');
+      const res = await updateBookings(editingBooking);
+      if (res.status === 200) {
+        await loadBookings();
+        setEditingBooking(null);
+        showNotification("Bokning uppdaterad", "success");
+      }
+      // const updatedBookings = bookings.map((booking) =>
+      //   booking.id === editingBooking.id
+      //     ? { ...booking, ...editFormData }
+      //     : booking
+      // );
+      // localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+      // setBookings(updatedBookings);
+      // setEditingBooking(null);
+      // showNotification("Bokning uppdaterad");
     } catch (err) {
-      setError('Kunde inte uppdatera bokningen');
-      console.error('Error updating booking:', err);
+      setError("Kunde inte uppdatera bokningen");
+      console.error("Error updating booking:", err);
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'error';
+      case "confirmed":
+        return "success";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'confirmed':
-        return 'Bekräftad';
-      case 'pending':
-        return 'Väntar';
-      case 'cancelled':
-        return 'Avbokad';
+      case "confirmed":
+        return "Bekräftad";
+      case "pending":
+        return "Väntar";
+      case "cancelled":
+        return "Avbokad";
       default:
         return status;
     }
@@ -210,17 +236,17 @@ const AdminDashboard = () => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return 'Ogiltigt datum';
+        return "Ogiltigt datum";
       }
-      return date.toLocaleDateString('sv-SE');
+      return date.toLocaleDateString("sv-SE");
     } catch (error) {
-      return 'Ogiltigt datum';
+      return "Ogiltigt datum";
     }
   };
 
   const formatTime = (timeString) => {
     try {
-      if (!timeString) return 'Ingen tid angiven';
+      if (!timeString) return "Ingen tid angiven";
       // Kontrollera om tiden redan är i rätt format (HH:mm)
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeString)) {
         return timeString;
@@ -228,19 +254,28 @@ const AdminDashboard = () => {
       // Om tiden är i ISO-format, extrahera bara HH:mm
       const time = new Date(timeString);
       if (isNaN(time.getTime())) {
-        return 'Ogiltig tid';
+        return "Ogiltig tid";
       }
-      return time.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+      return time.toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } catch (error) {
-      return 'Ogiltig tid';
+      return "Ogiltig tid";
     }
   };
 
   const getStatistics = () => {
     const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-    const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-    const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
+    const confirmedBookings = bookings.filter(
+      (b) => b.status === "confirmed"
+    ).length;
+    const pendingBookings = bookings.filter(
+      (b) => b.status === "pending"
+    ).length;
+    const cancelledBookings = bookings.filter(
+      (b) => b.status === "cancelled"
+    ).length;
 
     return {
       totalBookings,
@@ -252,7 +287,12 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -263,20 +303,27 @@ const AdminDashboard = () => {
   return (
     <Container maxWidth="lg">
       {notification && (
-        <Alert 
-          severity={notification.severity} 
-          sx={{ 
-            position: 'fixed', 
-            top: 20, 
-            right: 20, 
-            zIndex: 1000 
+        <Alert
+          severity={notification.severity}
+          sx={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            zIndex: 1000,
           }}
         >
           {notification.message}
         </Alert>
       )}
       <Box sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+          }}
+        >
           <StyledTypography variant="h4">
             Wolly Hair Salon - Admin Panel
           </StyledTypography>
@@ -296,9 +343,7 @@ const AdminDashboard = () => {
                 <Typography color="textSecondary" gutterBottom>
                   Totalt antal bokningar
                 </Typography>
-                <Typography variant="h4">
-                  {stats.totalBookings}
-                </Typography>
+                <Typography variant="h4">{stats.totalBookings}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -364,7 +409,9 @@ const AdminDashboard = () => {
                     <TableCell>
                       <Select
                         value={booking.status}
-                        onChange={(e) => handleStatusChange(booking.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusChange(booking, e.target.value)
+                        }
                         size="small"
                       >
                         <MenuItem value="Bekräftad">Bekräftad</MenuItem>
@@ -374,10 +421,16 @@ const AdminDashboard = () => {
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <IconButton onClick={() => handleEdit(booking)} size="small">
+                      <IconButton
+                        onClick={() => handleEdit(booking)}
+                        size="small"
+                      >
                         <EditIcon />
                       </IconButton>
-                      <IconButton onClick={() => handleDelete(booking.id)} size="small">
+                      <IconButton
+                        onClick={() => handleDelete(booking.id || booking._id)}
+                        size="small"
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
@@ -398,8 +451,17 @@ const AdminDashboard = () => {
                     fullWidth
                     label="Kundnamn"
                     name="customerName"
-                    value={editingBooking?.customerName || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, customerName: e.target.value })}
+                    value={editingBooking?.customerName || ""}
+                    onChange={(e) => {
+                      setEditFormData({
+                        ...editFormData,
+                        customerName: e.target.value,
+                      });
+                      setEditingBooking({
+                        ...editingBooking,
+                        customerName: e.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -408,7 +470,16 @@ const AdminDashboard = () => {
                     name="date"
                     type="date"
                     value={editFormData.date}
-                    onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
+                    onChange={(e) => {
+                      setEditFormData({
+                        ...editFormData,
+                        date: e.target.value,
+                      });
+                      setEditingBooking({
+                        ...editingBooking,
+                        date: e.target.value,
+                      });
+                    }}
                     InputLabelProps={{ shrink: true }}
                   />
                 </Grid>
@@ -418,7 +489,16 @@ const AdminDashboard = () => {
                     name="time"
                     type="time"
                     value={editFormData.time}
-                    onChange={(e) => setEditFormData({ ...editFormData, time: e.target.value })}
+                    onChange={(e) => {
+                      setEditFormData({
+                        ...editFormData,
+                        time: e.target.value,
+                      });
+                      setEditingBooking({
+                        ...editingBooking,
+                        time: e.target.value,
+                      });
+                    }}
                     InputLabelProps={{ shrink: true }}
                   />
                 </Grid>
@@ -428,7 +508,16 @@ const AdminDashboard = () => {
                     label="Tjänst"
                     name="service"
                     value={editFormData.service}
-                    onChange={(e) => setEditFormData({ ...editFormData, service: e.target.value })}
+                    onChange={(e) => {
+                      setEditFormData({
+                        ...editFormData,
+                        service: e.target.value,
+                      });
+                      setEditingBooking({
+                        ...editingBooking,
+                        service: e.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -436,7 +525,16 @@ const AdminDashboard = () => {
                     <InputLabel>Status</InputLabel>
                     <Select
                       value={editFormData.status}
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                      onChange={(e) => {
+                        setEditFormData({
+                          ...editFormData,
+                          status: e.target.value,
+                        });
+                        setEditingBooking({
+                          ...editingBooking,
+                          status: e.target.value,
+                        });
+                      }}
                       label="Status"
                     >
                       <MenuItem value="Bekräftad">Bekräftad</MenuItem>
@@ -451,7 +549,11 @@ const AdminDashboard = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditingBooking(null)}>Avbryt</Button>
-            <Button onClick={handleSaveEdit} variant="contained" color="primary">
+            <Button
+              onClick={handleSaveEdit}
+              variant="contained"
+              color="primary"
+            >
               Spara
             </Button>
           </DialogActions>
@@ -461,4 +563,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;

@@ -10,6 +10,15 @@ export const createBookings = async (bookingData) => {
     }
 }
 
+export const createGuestBookings = async (bookingData) => {
+    try {
+        const response = await api.post("/api/bookings/guest", bookingData);
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 export const fetchBookings = async () => {
     try {
         const response = await api.get("/api/bookings");

@@ -74,6 +74,24 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// Create new booking for guest
+router.post('/guest', async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'development') {
+      return res.status(201).json({ message: 'Booking created (mock)' });
+    }
+    const booking = new Booking({
+      ...req.body,
+      customer: new mongoose.Types.ObjectId("0000bdea0000000000000000")
+    });
+    await booking.save();
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    res.status(400).json({ message: 'Error creating booking' });
+  }
+});
+
 // Update booking
 router.put('/:id', auth, async (req, res) => {
   try {

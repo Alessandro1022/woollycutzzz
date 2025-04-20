@@ -21,7 +21,7 @@ import { format, parse } from "date-fns";
 import sv from "date-fns/locale/sv";
 import api from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-import { createBookings } from "../api/bookings";
+import { createBookings, createGuestBookings } from "../api/bookings";
 
 // Styled components
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -102,7 +102,7 @@ const BookingForm = () => {
     service: location.state?.service || "",
     customerName: "",
     customerPhone: "",
-    id: user.id,
+    id: user?.id || "",
   });
 
   const [error, setError] = useState(null);
@@ -153,8 +153,9 @@ const BookingForm = () => {
     }
 
     try {
+      let res = {};
       const newBooking = {
-        id: user.id,
+        id: user?.id || "",
         customerName: formData.customerName,
         customerPhone: formData.customerPhone,
         service: formData.service,
@@ -165,7 +166,12 @@ const BookingForm = () => {
         // stylistId: location.state.stylistId,
       };
 
-      const res = await createBookings(newBooking);
+      if (user?.id) {
+        res = await createBookings(newBooking);
+      } else {
+        res = await createGuestBookings(newBooking);
+      }
+
       if (res.status === 201) {
         // // Spara bokningen i localStorage
         // const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");

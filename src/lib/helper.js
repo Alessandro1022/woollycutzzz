@@ -6,3 +6,9 @@ export const formatDateToTime = (_date) => {
     }
 }
 
+export const getNextDate = () => {
+    const nextDay = new Date();
+    nextDay.setDate(nextDay.getDate() + 1);
+    return nextDay;
+}
+

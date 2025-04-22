@@ -19,6 +19,7 @@ import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import sv from "date-fns/locale/sv";
 import { API_BASE_URL } from "../lib/constants";
+import { getNextDate } from "../lib/helper";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -61,7 +62,7 @@ const StylistDetailPage = () => {
   const location = useLocation();
   const selectedStylist = location?.state || {};
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(getNextDate());
   const [selectedTime, setSelectedTime] = useState(null);
   const [error, setError] = useState(null);
 
@@ -101,12 +102,33 @@ const StylistDetailPage = () => {
   // };
 
   const handleDateChange = (date) => {
-    const day = date.getDay();
-    const isAvailable = stylist.availability.days.includes(
-      ["söndag", "måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag"][
-        day
-      ]
-    );
+    // const day = date.getDay();
+
+    // const isAvailable = selectedStylist?.availability?.days?.includes(
+    //   [
+    //     "söndag",
+    //     "måndag",
+    //     "tisdag",
+    //     "onsdag",
+    //     "torsdag",
+    //     "fredag",
+    //     "lördag",
+    //     "Monday",
+    //     "Tuesday",
+    //     "Wednesday",
+    //     "Thursday",
+    //     "Friday",
+    //     "Saturday",
+    //     "Sunday",
+    //   ][day]
+    // );
+
+    const selectedDayName = date.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    const isAvailable =
+      selectedStylist?.availability?.days?.includes(selectedDayName);
 
     if (!isAvailable) {
       setError("Inga tider tillgängliga denna dag");
@@ -266,7 +288,7 @@ const StylistDetailPage = () => {
                 <DateCalendar
                   value={selectedDate}
                   onChange={handleDateChange}
-                  minDate={new Date()}
+                  minDate={getNextDate()}
                   sx={{
                     "& .Mui-selected": {
                       backgroundColor: "#D4AF37 !important",
@@ -275,6 +297,9 @@ const StylistDetailPage = () => {
                       "&:hover": {
                         backgroundColor: "rgba(212, 175, 55, 0.1)",
                       },
+                    },
+                    "& .MuiPickersDay-today": {
+                      border: "none !important",
                     },
                   }}
                 />

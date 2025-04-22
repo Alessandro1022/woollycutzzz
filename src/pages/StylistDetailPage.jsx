@@ -244,7 +244,7 @@ const StylistDetailPage = () => {
                 >
                   {selectedStylist?.name}
                 </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                {/* <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <Rating
                     value={selectedStylist?.rating || 0}
                     precision={0.1}
@@ -253,7 +253,7 @@ const StylistDetailPage = () => {
                   <Typography variant="body2" sx={{ ml: 1 }}>
                     ({selectedStylist?.reviews || 0} recensioner)
                   </Typography>
-                </Box>
+                </Box> */}
                 <Typography variant="body1" paragraph>
                   {selectedStylist?.bio}
                 </Typography>

@@ -136,9 +136,9 @@ const StylistGrid = () => {
                   <Typography variant="body2" color="text.secondary">
                     Experience: {stylist.experience} years
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  {/* <Typography variant="body2" color="text.secondary">
                     Rating: {stylist.rating.toFixed(1)} / 5.0
-                  </Typography>
+                  </Typography> */}
                 </CardContent>
               </CardActionArea>
             </Card>

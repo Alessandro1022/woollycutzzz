@@ -39,16 +39,26 @@ const stylistSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  availability: [{
+  // availability: [{
+  //   day: {
+  //     type: String,
+  //     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+  //   },
+  //   slots: [{
+  //     start: String,
+  //     end: String
+  //   }]
+  // }],
+  availability: {
     day: {
       type: String,
       enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     },
-    slots: [{
+    hours: {
       start: String,
       end: String
-    }]
-  }],
+    }
+  },
   imageUrl: {
     type: String,
     trim: true
@@ -58,10 +68,10 @@ const stylistSchema = new mongoose.Schema({
 });
 
 // Add text index for search functionality
-stylistSchema.index({ 
-  name: 'text', 
-  specialties: 'text', 
-  bio: 'text' 
+stylistSchema.index({
+  name: 'text',
+  specialties: 'text',
+  bio: 'text'
 });
 
 export const Stylist = mongoose.model('Stylist', stylistSchema);

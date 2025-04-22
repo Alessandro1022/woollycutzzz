@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/constants';
 
 // Mock data for testing
 const mockStylists = {
@@ -90,8 +91,7 @@ const mockData = {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: 'https://woolley.onrender.com',
-  // baseURL: 'http://localhost:4001',
+  baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',

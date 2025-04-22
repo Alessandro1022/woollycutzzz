@@ -135,10 +135,8 @@ const BookingForm = () => {
     e.preventDefault();
     setError(null);
 
-    // Validera telefonnummer
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.customerPhone.replace(/\s/g, ""))) {
-      setError("Vänligen ange ett giltigt telefonnummer (10 siffror)");
+    if (!formData.date || !formData.time) {
+      setError("Vänligen välj både datum och tid");
       return;
     }
 
@@ -147,8 +145,15 @@ const BookingForm = () => {
       return;
     }
 
-    if (!formData.date || !formData.time) {
-      setError("Vänligen välj både datum och tid");
+    // Validera telefonnummer
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.customerPhone.replace(/\s/g, ""))) {
+      setError("Vänligen ange ett giltigt telefonnummer (10 siffror)");
+      return;
+    }
+
+    if (!formData?.service?.trim()) {
+      setError("Please select service");
       return;
     }
 

@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import api from "../api/client";
+import { API_BASE_URL } from "../lib/constants";
 
 const StylistGrid = () => {
   const [stylists, setStylists] = useState([]);
@@ -39,16 +40,14 @@ const StylistGrid = () => {
 
   useEffect(() => {
     fetchStylists();
-  }, [fetchStylists]);
+  }, []);
 
   const handleSearch = useCallback((event) => {
     setSearchTerm(event.target?.value?.toLowerCase());
   }, []);
-
-  const handleStylistClick = (stylistId) => {
-    navigate(`/stylist/${stylistId}`);
+  const handleStylistClick = (stylist) => {
+    navigate(`/stylist/${stylist?._id}`, { state: stylist });
   };
-
   const filteredStylists = stylists.filter(
     (stylist) =>
       stylist?.name?.toLowerCase()?.includes(searchTerm) ||
@@ -112,13 +111,15 @@ const StylistGrid = () => {
                 },
                 cursor: "pointer",
               }}
-              onClick={() => handleStylistClick(stylist._id || stylist.id)}
+              onClick={() => handleStylistClick(stylist)}
             >
               <CardActionArea>
                 <CardMedia
                   component="img"
                   height="200"
-                  image={stylist.imageUrl || "/default-stylist.jpg"}
+                  image={
+                    `${API_BASE_URL}/${stylist.image}` || "/default-stylist.jpg"
+                  }
                   alt={stylist.name}
                   sx={{ objectFit: "cover" }}
                 />

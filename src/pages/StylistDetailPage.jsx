@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Container,
   Paper,
@@ -18,6 +18,7 @@ import { styled } from "@mui/material/styles";
 import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import sv from "date-fns/locale/sv";
+import { API_BASE_URL } from "../lib/constants";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -57,45 +58,47 @@ const StyledCardMedia = styled(CardMedia)(({ theme }) => ({
 const StylistDetailPage = () => {
   const navigate = useNavigate();
   const { stylistId } = useParams();
+  const location = useLocation();
+  const selectedStylist = location?.state || {};
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(null);
   const [error, setError] = useState(null);
 
-  const stylist = {
-    id: "1",
-    name: "Woolley Cutzzz",
-    image: "/images/stylist1.jpg",
-    rating: 4.9,
-    reviews: 128,
-    bio: "Professionell frisör med fokus på herrklippning och skäggvård. Erbjuder en avslappnad och professionell upplevelse i Kristinedal träningcenter.",
-    specialties: ["Herrklippning", "Skäggvård"],
-    experience: "5+ års erfarenhet",
-    availability: {
-      days: ["onsdag", "torsdag", "fredag", "lördag", "söndag"],
-      hours: {
-        start: "11:00",
-        end: "23:00",
-      },
-    },
-    services: [
-      {
-        id: "1",
-        name: "Herrklippning",
-        price: 150,
-        duration: "30 min",
-        description: "Professionell herrklippning med modern finish",
-      },
-      {
-        id: "2",
-        name: "Herrklippning med skägg",
-        price: 200,
-        duration: "45 min",
-        description: "Herrklippning inklusive skäggtrimning och styling",
-      },
-    ],
-    location: "Kristinedal träningcenter",
-  };
+  // const stylist = {
+  //   id: "1",
+  //   name: "Woolley Cutzzz",
+  //   image: "/images/stylist1.jpg",
+  //   rating: 4.9,
+  //   reviews: 128,
+  //   bio: "Professionell frisör med fokus på herrklippning och skäggvård. Erbjuder en avslappnad och professionell upplevelse i Kristinedal träningcenter.",
+  //   specialties: ["Herrklippning", "Skäggvård"],
+  //   experience: "5+ års erfarenhet",
+  //   availability: {
+  //     days: ["onsdag", "torsdag", "fredag", "lördag", "söndag"],
+  //     hours: {
+  //       start: "11:00",
+  //       end: "23:00",
+  //     },
+  //   },
+  //   services: [
+  //     {
+  //       id: "1",
+  //       name: "Herrklippning",
+  //       price: 150,
+  //       duration: "30 min",
+  //       description: "Professionell herrklippning med modern finish",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Herrklippning med skägg",
+  //       price: 200,
+  //       duration: "45 min",
+  //       description: "Herrklippning inklusive skäggtrimning och styling",
+  //     },
+  //   ],
+  //   location: "Kristinedal träningcenter",
+  // };
 
   const handleDateChange = (date) => {
     const day = date.getDay();
@@ -113,7 +116,6 @@ const StylistDetailPage = () => {
     setSelectedDate(date);
     setError(null);
   };
-
   const handleTimeSelect = (time) => {
     const [hours, minutes] = time.split(":").map(Number);
     const selectedDateTime = new Date(selectedDate);
@@ -133,21 +135,20 @@ const StylistDetailPage = () => {
     setSelectedTime(time);
     setError(null);
   };
-
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) {
       setError("Välj datum och tid för bokningen");
       return;
     }
 
-    navigate("/booking", {
-      state: {
-        stylistId: stylistId,
-        date: selectedDate.toISOString(),
-        time: selectedTime,
-        stylistName: stylist.name,
-      },
-    });
+    const stateData = {
+      stylistId: stylistId,
+      date: selectedDate.toISOString(),
+      time: selectedTime,
+      stylistName: selectedStylist.name,
+    };
+
+    navigate("/booking", { state: stateData });
   };
 
   return (
@@ -156,7 +157,10 @@ const StylistDetailPage = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <StyledCard>
-              <StyledCardMedia image={stylist.image} title={stylist.name} />
+              <StyledCardMedia
+                image={`${API_BASE_URL}/${selectedStylist?.image}` || ""}
+                title={selectedStylist?.name}
+              />
               <CardContent>
                 <Typography
                   variant="h4"
@@ -164,31 +168,35 @@ const StylistDetailPage = () => {
                   gutterBottom
                   sx={{ color: "#D4AF37" }}
                 >
-                  {stylist.name}
+                  {selectedStylist?.name}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Rating value={stylist.rating} precision={0.1} readOnly />
+                  <Rating
+                    value={selectedStylist?.rating || 0}
+                    precision={0.1}
+                    readOnly
+                  />
                   <Typography variant="body2" sx={{ ml: 1 }}>
-                    ({stylist.reviews} recensioner)
+                    ({selectedStylist?.reviews || 0} recensioner)
                   </Typography>
                 </Box>
                 <Typography variant="body1" paragraph>
-                  {stylist.bio}
+                  {selectedStylist?.bio}
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  <strong>Erfarenhet:</strong> {stylist.experience}
+                  <strong>Erfarenhet:</strong> {selectedStylist?.experience}
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  <strong>Adress:</strong> {stylist.location}
+                  <strong>Adress:</strong> {selectedStylist?.location}
                 </Typography>
                 <Typography variant="body1" paragraph>
                   <strong>Tillgänglighet:</strong>{" "}
-                  {stylist.availability.days.join(", ")}{" "}
-                  {stylist.availability.hours.start}-
-                  {stylist.availability.hours.end}
+                  {selectedStylist?.availability?.days?.join(", ")}{" "}
+                  {selectedStylist?.availability?.hours?.start + " "}-
+                  {" " + selectedStylist?.availability?.hours?.end}
                 </Typography>
                 <Box sx={{ mt: 2 }}>
-                  {stylist.specialties.map((specialty, index) => (
+                  {selectedStylist?.specialties?.map((specialty, index) => (
                     <Chip
                       key={index}
                       label={specialty}
@@ -211,8 +219,13 @@ const StylistDetailPage = () => {
                 Tjänster
               </Typography>
               <Grid container spacing={2}>
-                {stylist.services.map((service) => (
-                  <Grid item xs={12} key={service.id}>
+                {selectedStylist?.services?.map((service, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    key={service.id}
+                    sx={{ cursor: "default" }}
+                  >
                     <Card
                       sx={{
                         background:

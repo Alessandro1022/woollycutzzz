@@ -29,6 +29,11 @@ const stylistSchema = new mongoose.Schema({
     type: Number,
     min: 0
   },
+  reviews: {
+    type: Number,
+    min: 0,
+    default: 0
+  },
   rating: {
     type: Number,
     min: 0,

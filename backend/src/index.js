@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import userRoutes from './routes/user.routes.js';
 import stylistRoutes from './routes/stylist.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
+import ratingRoutes from './routes/rating.routes.js';
 import authRoutes from './routes/auth.routes.js';
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stylists', stylistRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

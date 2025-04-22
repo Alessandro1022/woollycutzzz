@@ -2,7 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import User from '../models/user.model.js';
 import { auth, authorize } from '../middleware/auth.js';
-import Stylist from '../models/Stylist.js';
+import Stylist from '../models/stylist.model.js';
 import { mockStylists } from '../data/mockData.js';
 
 const router = express.Router();

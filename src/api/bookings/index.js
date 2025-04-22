@@ -46,3 +46,12 @@ export const deleteBookings = async (bookingId) => {
         console.log(error);
     }
 }
+
+export const getBookedTimeSlots = async (data) => {
+    try {
+        const response = await api.post(`/api/bookings/bookedSlots`, data);
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Container,
@@ -20,9 +20,10 @@ import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import sv from "date-fns/locale/sv";
 import { API_BASE_URL } from "../lib/constants";
-import { getNextDate } from "../lib/helper";
+import { generateHourlySlots, getNextDate } from "../lib/helper";
 import { createGuestRating, createRatings } from "../api/ratings";
 import { useAuth } from "../contexts/AuthContext";
+import { getBookedTimeSlots } from "../api/bookings";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -71,6 +72,7 @@ const StylistDetailPage = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [ratings, setRatings] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [error, setError] = useState(null);
 
   // const stylist = {
@@ -108,6 +110,26 @@ const StylistDetailPage = () => {
   //   location: "Kristinedal träningcenter",
   // };
 
+  useEffect(() => {
+    fetchBookedSlots();
+  }, []);
+
+  const fetchBookedSlots = async (_date) => {
+    try {
+      const _data = {
+        stylistId: stylistId,
+        date: _date
+          ? _date.toISOString().slice(0, 10)
+          : selectedDate.toISOString().slice(0, 10),
+      };
+      const bookedSlots = await getBookedTimeSlots(_data);
+      if (bookedSlots.status === 200) {
+        setBookedSlots(bookedSlots?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleDateChange = (date) => {
     // const day = date.getDay();
 
@@ -134,6 +156,11 @@ const StylistDetailPage = () => {
       weekday: "long",
     });
 
+    if (selectedDayName === "Monday" || selectedDayName === "Tuesday") {
+      setError("Inga tider tillgängliga denna dag");
+      return;
+    }
+
     const isAvailable =
       selectedStylist?.availability?.days?.includes(selectedDayName);
 
@@ -144,6 +171,7 @@ const StylistDetailPage = () => {
 
     setSelectedDate(date);
     setError(null);
+    fetchBookedSlots(date);
   };
   const handleTimeSelect = (time) => {
     const [hours, minutes] = time.split(":").map(Number);
@@ -334,7 +362,34 @@ const StylistDetailPage = () => {
                   Tillgängliga tider:
                 </Typography>
                 <Grid container spacing={1}>
-                  {Array.from({ length: 12 }, (_, i) => {
+                  {generateHourlySlots(
+                    selectedStylist.availability.hours.start,
+                    selectedStylist.availability.hours.end
+                  )?.map((time, index) => {
+                    return (
+                      <Grid item xs={4} key={index}>
+                        <Button
+                          disabled={bookedSlots.includes(time)}
+                          variant={
+                            selectedTime === time ? "contained" : "outlined"
+                          }
+                          onClick={() => handleTimeSelect(time)}
+                          sx={{
+                            width: "100%",
+                            borderColor: "#D4AF37",
+                            color:
+                              selectedTime === time ? "#FFFFFF" : "#D4AF37",
+                            "&:hover": {
+                              borderColor: "#B38B2D",
+                            },
+                          }}
+                        >
+                          {time}
+                        </Button>
+                      </Grid>
+                    );
+                  })}
+                  {/* {Array.from({ length: 12 }, (_, i) => {
                     const hour = i + 11;
                     const time = `${hour.toString().padStart(2, "0")}:00`;
                     return (
@@ -358,7 +413,7 @@ const StylistDetailPage = () => {
                         </Button>
                       </Grid>
                     );
-                  })}
+                  })} */}
                 </Grid>
               </Box>
 

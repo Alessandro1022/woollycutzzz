@@ -161,4 +161,20 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// get available time slotes
+router.post('/bookedSlots', async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'development' || process.env.MOCK_MODE === 'true') {
+      return res.json(mockBookings);
+    }
+
+    const allbookings = await Booking.find({ stylist: req.body.stylistId, date: req.body.date });
+    const bookedTimeSlots = [...new Set(allbookings.map(b => b.time))].sort();
+    return res.status(200).json(bookedTimeSlots || []);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ message: 'Error fetching bookings' });
+  }
+});
+
 export default router; 

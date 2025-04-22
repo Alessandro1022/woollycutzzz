@@ -121,26 +121,7 @@ const BookingConfirmation = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      setLoading(true);
-      const _data = {
-        customer: booking?.id || "",
-        stylist: booking?.stylist || "",
-        rating: ratings,
-      };
-
-      if (user?.id) {
-        await createRatings(_data);
-      } else {
-        await createGuestRating(_data);
-      }
-
-      return navigate("/");
-    } catch (error) {
-      console.error("error", error);
-    } finally {
-      setLoading(false);
-    }
+    return navigate("/");
   };
 
   if (error) {
@@ -204,18 +185,6 @@ const BookingConfirmation = () => {
               <Typography variant="body1">
                 <strong>Pris:</strong> {getServicePrice(booking.service)}
               </Typography>
-              <Typography variant="body1" mt={1}>
-                <strong>Share your feedback</strong>
-              </Typography>
-              <Rating
-                value={ratings}
-                onChange={(e, value) => setRatings(value)}
-                precision={0.1}
-                size="large"
-                style={{
-                  left: "-0.2rem",
-                }}
-              />
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -242,11 +211,7 @@ const BookingConfirmation = () => {
                   onClick={handleSubmit}
                   style={{ width: "15rem" }}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Tillbaka till startsidan"
-                  )}
+                  Tillbaka till startsidan
                 </StyledButton>
               </Box>
             </Grid>

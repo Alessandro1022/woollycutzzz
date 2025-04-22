@@ -13,6 +13,7 @@ import {
   Rating,
   Chip,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
@@ -20,6 +21,8 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import sv from "date-fns/locale/sv";
 import { API_BASE_URL } from "../lib/constants";
 import { getNextDate } from "../lib/helper";
+import { createGuestRating, createRatings } from "../api/ratings";
+import { useAuth } from "../contexts/AuthContext";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -60,10 +63,14 @@ const StylistDetailPage = () => {
   const navigate = useNavigate();
   const { stylistId } = useParams();
   const location = useLocation();
+  const { user } = useAuth();
+
   const selectedStylist = location?.state || {};
 
   const [selectedDate, setSelectedDate] = useState(getNextDate());
   const [selectedTime, setSelectedTime] = useState(null);
+  const [ratings, setRatings] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // const stylist = {
@@ -157,20 +164,37 @@ const StylistDetailPage = () => {
     setSelectedTime(time);
     setError(null);
   };
-  const handleBooking = () => {
-    if (!selectedDate || !selectedTime) {
-      setError("Välj datum och tid för bokningen");
-      return;
+  const handleBooking = async () => {
+    try {
+      if (!selectedDate || !selectedTime) {
+        setError("Välj datum och tid för bokningen");
+        return;
+      }
+      setLoading(true);
+
+      const ratingData = {
+        customer: user?.id || "",
+        stylist: stylistId,
+        rating: ratings,
+      };
+      if (user?.id) {
+        await createRatings(ratingData);
+      } else {
+        await createGuestRating(ratingData);
+      }
+
+      const stateData = {
+        stylistId: stylistId,
+        date: selectedDate.toISOString(),
+        time: selectedTime,
+        stylistName: selectedStylist.name,
+      };
+      navigate("/booking", { state: stateData });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-
-    const stateData = {
-      stylistId: stylistId,
-      date: selectedDate.toISOString(),
-      time: selectedTime,
-      stylistName: selectedStylist.name,
-    };
-
-    navigate("/booking", { state: stateData });
   };
 
   return (
@@ -338,13 +362,29 @@ const StylistDetailPage = () => {
                 </Grid>
               </Box>
 
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Share your feedback
+                </Typography>
+                <Rating
+                  value={ratings}
+                  onChange={(e, value) => setRatings(value)}
+                  precision={0.1}
+                  size="large"
+                  style={{
+                    left: "-0.2rem",
+                  }}
+                />
+              </Box>
+
               <Box sx={{ mt: 4, textAlign: "center" }}>
                 <StyledButton
                   variant="contained"
                   onClick={handleBooking}
                   disabled={!selectedDate || !selectedTime}
+                  style={{ width: "8rem" }}
                 >
-                  Boka tid
+                  {loading ? <CircularProgress size={24} /> : "Boka tid"}
                 </StyledButton>
               </Box>
             </Box>

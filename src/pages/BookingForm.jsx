@@ -236,7 +236,7 @@ const BookingForm = () => {
                       disabled={isLoggedIn}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sx={{ minWidth: "30%" }}>
                     <StyledTextField
                       fullWidth
                       select
@@ -268,6 +268,7 @@ const BookingForm = () => {
                           required: true,
                         },
                       }}
+                      disabled={isLoggedIn}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -283,6 +284,7 @@ const BookingForm = () => {
                           required: true,
                         },
                       }}
+                      disabled={isLoggedIn}
                     />
                   </Grid>
                   <Grid item xs={12}>

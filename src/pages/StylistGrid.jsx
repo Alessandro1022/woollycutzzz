@@ -110,6 +110,8 @@ const StylistGrid = () => {
                   transition: "all 0.3s ease-in-out",
                 },
                 cursor: "pointer",
+                minWidth: "400px",
+                maxWidth: "400px",
               }}
               onClick={() => handleStylistClick(stylist)}
             >

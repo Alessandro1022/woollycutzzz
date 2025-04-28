@@ -47,7 +47,7 @@ const Layout = () => {
         <StyledToolbar>
           <NavButton onClick={() => navigate("/")}>
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              WoolleyCutzz
+              BokaEnkelt
             </Typography>
           </NavButton>
           <Box>

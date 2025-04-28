@@ -38,10 +38,10 @@ const Home = () => {
             marginBottom: 2,
           }}
         >
-          Welcome to WoolleyCutzz
+          Welcome to BokaEnkelt
         </Typography>
         <Typography variant="h2" component="h1" gutterBottom>
-          Välkommen till WoolleyCutzz
+          Välkommen till BokaEnkelt
         </Typography>
         <Typography
           variant="h5"
@@ -51,8 +51,8 @@ const Home = () => {
             maxWidth: "600px",
           }}
         >
-          Experience the art of luxury hair styling with our expert stylists.
-          Book your appointment today and transform your look.
+          Upplev konsten av enkel och smidig bokning med vår smarta plattform.
+          Boka din tid idag och förenkla din vardag.
         </Typography>
         <StyledButton
           component={RouterLink}
@@ -60,7 +60,7 @@ const Home = () => {
           variant="contained"
           size="large"
         >
-          Book Appointment
+          Book Now
         </StyledButton>
       </StyledBox>
     </Container>

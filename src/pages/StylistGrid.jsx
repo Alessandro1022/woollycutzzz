@@ -118,7 +118,9 @@ const StylistGrid = () => {
                   component="img"
                   height="200"
                   image={
-                    `${API_BASE_URL}/${stylist.image}` || "/default-stylist.jpg"
+                    stylist.imageUrl
+                      ? stylist.imageUrl
+                      : `${API_BASE_URL}/${stylist.imageUrl}`
                   }
                   alt={stylist.name}
                   sx={{ objectFit: "cover" }}

@@ -13,15 +13,16 @@ router.get('/', auth, async (req, res) => {
     if (process.env.NODE_ENV === 'development' || process.env.MOCK_MODE === 'true') {
       return res.json(mockBookings);
     }
+
     if (req.user.role === "admin") {
-      const bookings = await Booking.find()
-        .populate('customer', 'name email')
-        .populate('stylist', 'name email');
+      const bookings = await Booking.find({})
+      // .populate('customer', 'name email')
+      // .populate('stylist', 'name email');
       res.json(bookings);
     } else {
       const bookings = await Booking.find({ customer: new mongoose.Types.ObjectId(req.user._id) })
-        .populate('customer', 'name email')
-        .populate('stylist', 'name email');
+      // .populate('customer', 'name email')
+      // .populate('stylist', 'name email');
       res.json(bookings);
     }
   } catch (error) {

@@ -17,10 +17,10 @@ const stylistSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  specialties: [{
-    type: String,
+  specialties: {
+    type: [String],
     trim: true
-  }],
+  },
   bio: {
     type: String,
     trim: true
@@ -54,9 +54,26 @@ const stylistSchema = new mongoose.Schema({
   //     end: String
   //   }]
   // }],
-  availability: {
-    day: {
+  services: [{
+    name: {
       type: String,
+      trime: true
+    },
+    price: {
+      type: Number,
+    },
+    duration: {
+      type: String,
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true
+    }
+  }],
+  availability: {
+    days: {
+      type: [String],
       enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     },
     hours: {
@@ -65,6 +82,10 @@ const stylistSchema = new mongoose.Schema({
     }
   },
   imageUrl: {
+    type: String,
+    trim: true
+  },
+  location: {
     type: String,
     trim: true
   }
